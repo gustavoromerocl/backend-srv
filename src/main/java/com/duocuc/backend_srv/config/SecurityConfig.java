@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -35,6 +36,7 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable()) // Desactivar CSRF para API REST
         .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.GET, "/api/recipes").permitAll()
             .requestMatchers("/api/auth/**").permitAll() // Permitir acceso a las rutas de autenticación
             .anyRequest().authenticated() // Requerir autenticación para el resto de las rutas
         )

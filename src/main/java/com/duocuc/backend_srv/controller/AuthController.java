@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.duocuc.backend_srv.dto.JwtResponse;
 import com.duocuc.backend_srv.dto.LoginRequest;
 import com.duocuc.backend_srv.dto.SignUpRequest;
+import com.duocuc.backend_srv.exception.UserAlreadyExistsException;
 import com.duocuc.backend_srv.service.UserService;
 import com.duocuc.backend_srv.util.JwtUtils;
 
@@ -44,11 +45,8 @@ public class AuthController {
   // Ruta para registrar un usuario
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) {
-    // Verificar si el nombre de usuario ya está en uso
     if (userService.existsByUsername(signUpRequest.getUsername())) {
-      return ResponseEntity
-          .badRequest()
-          .body("Error: Username is already taken!");
+      throw new UserAlreadyExistsException("Error: Username is already taken!");
     }
 
     // Registrar el nuevo usuario usando el método registerUser de UserService
