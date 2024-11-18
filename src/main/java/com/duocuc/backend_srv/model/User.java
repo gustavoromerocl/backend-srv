@@ -7,6 +7,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -29,10 +33,12 @@ public class User {
   private Set<Role> roles = new HashSet<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Rating> ratings = new ArrayList<>();
+  @JsonIgnore // Evitar referencias cíclicas de comentarios
+  private List<Comment> comments;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Comment> comments = new ArrayList<>();
+  @JsonIgnore // Evitar referencias cíclicas de ratings
+  private List<Rating> ratings;
 
   // Constructor sin argumentos (necesario para JPA)
   public User() {

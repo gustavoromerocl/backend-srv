@@ -1,11 +1,20 @@
 package com.duocuc.backend_srv.controller;
 
+import com.duocuc.backend_srv.model.Comment;
 import com.duocuc.backend_srv.model.Photo;
+import com.duocuc.backend_srv.model.Rating;
 import com.duocuc.backend_srv.model.Recipe;
+import com.duocuc.backend_srv.model.User;
+import com.duocuc.backend_srv.service.CommentService;
+import com.duocuc.backend_srv.service.RatingService;
 import com.duocuc.backend_srv.service.RecipeService;
+import com.duocuc.backend_srv.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +26,15 @@ public class RecipeController {
 
     @Autowired
     private RecipeService recipeService;
+
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private RatingService ratingService;
+
+    @Autowired
+    private UserService userService;
 
     // Obtener todas las recetas
     @GetMapping
@@ -76,5 +94,45 @@ public class RecipeController {
     public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // POST /recipes/{id}/comments
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<Comment> addComment(@PathVariable Long id, @RequestBody Comment comment) {
+        Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        // Obtener el usuario logueado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // Obtener nombre del usuario logueado
+        User user = userService.findByUsername(username); // Método en UserService para buscar usuario
+
+        comment.setUser(user);
+        comment.setRecipe(recipeOpt.get());
+
+        Comment savedComment = commentService.addComment(comment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
+    }
+
+    // POST /recipes/{id}/ratings
+    @PostMapping("/{id}/ratings")
+    public ResponseEntity<Rating> addRating(@PathVariable Long id, @RequestBody Rating rating) {
+        Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        // Obtener el usuario logueado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+
+        rating.setUser(user);
+        rating.setRecipe(recipeOpt.get());
+
+        Rating savedRating = ratingService.addRating(rating);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRating);
     }
 }

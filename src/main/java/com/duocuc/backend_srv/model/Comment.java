@@ -3,6 +3,10 @@ package com.duocuc.backend_srv.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -13,10 +17,12 @@ public class Comment {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonIgnore // Evita la serialización cíclica aquí
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "recipe_id", nullable = false)
+  @JsonIgnore // También evita la referencia circular
   private Recipe recipe;
 
   @Column(nullable = false)
