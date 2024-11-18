@@ -1,6 +1,7 @@
 package com.duocuc.backend_srv.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 
@@ -14,11 +15,12 @@ public class Rating {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
-  @JsonBackReference
+  @JsonIgnore // Evita la serialización completa del usuario
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "recipe_id", nullable = false)
+  @JsonIgnore // Evita la serialización completa del usuario
   private Recipe recipe;
 
   @Column(nullable = false)

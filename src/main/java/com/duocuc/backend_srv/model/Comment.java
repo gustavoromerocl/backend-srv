@@ -3,9 +3,7 @@ package com.duocuc.backend_srv.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "comments")
@@ -17,12 +15,12 @@ public class Comment {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
-  @JsonIgnore // Evita la serialización cíclica aquí
+  @JsonIgnore // Evita la serialización completa del usuario
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "recipe_id", nullable = false)
-  @JsonIgnore // También evita la referencia circular
+  @JsonIgnore
   private Recipe recipe;
 
   @Column(nullable = false)
@@ -31,8 +29,16 @@ public class Comment {
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
+  @Transient // Campo no persistente, utilizado solo para la respuesta
+  private String username;
+
   public Comment() {
     this.createdAt = LocalDateTime.now();
+  }
+
+  @PostLoad
+  public void populateTransientFields() {
+    this.username = this.user != null ? this.user.getUsername() : null;
   }
 
   // Getters y setters
@@ -50,6 +56,7 @@ public class Comment {
 
   public void setUser(User user) {
     this.user = user;
+    this.username = user.getUsername(); // Set transitorio directamente
   }
 
   public Recipe getRecipe() {
@@ -74,5 +81,9 @@ public class Comment {
 
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public String getUsername() {
+    return username;
   }
 }

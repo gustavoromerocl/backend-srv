@@ -1,5 +1,6 @@
 package com.duocuc.backend_srv.controller;
 
+import com.duocuc.backend_srv.dto.CommentDto;
 import com.duocuc.backend_srv.model.Comment;
 import com.duocuc.backend_srv.model.Photo;
 import com.duocuc.backend_srv.model.Rating;
@@ -98,22 +99,21 @@ public class RecipeController {
 
     // POST /recipes/{id}/comments
     @PostMapping("/{id}/comments")
-    public ResponseEntity<Comment> addComment(@PathVariable Long id, @RequestBody Comment comment) {
+    public ResponseEntity<CommentDto> addComment(@PathVariable Long id, @RequestBody Comment comment) {
         Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
         if (recipeOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        // Obtener el usuario logueado
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Obtener nombre del usuario logueado
-        User user = userService.findByUsername(username); // Método en UserService para buscar usuario
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
 
         comment.setUser(user);
         comment.setRecipe(recipeOpt.get());
 
-        Comment savedComment = commentService.addComment(comment);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
+        CommentDto savedCommentDTO = commentService.addComment(comment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCommentDTO);
     }
 
     // POST /recipes/{id}/ratings
